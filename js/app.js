@@ -1,4 +1,4 @@
-import { BOOKS, GROUPS, WORKSHEETS, sheetById } from './worksheets.js?v=202610121954';
+import { BOOKS, GROUPS, WORKSHEETS, sheetById } from './worksheets.js?v=202610122032';
 import {
   play,
   stop,
@@ -11,16 +11,16 @@ import {
   clearAudioCache,
   checkScript,
   loadVoices,
-} from './tts.js?v=202610121954';
-import { handleRecorderClick } from './recorder.js?v=202610121954';
-import { handleBookClick, bookFiles } from './book.js?v=202610121954';
-import { esc, toast } from './ui.js?v=202610121954';
-import { initVoicePanel, open as openVoicePanel } from './voice-panel.js?v=202610121954';
-import { renderHome } from './views/home.js?v=202610121954';
-import { renderSheet, handleSheetClick, handleSheetKey, handleNameForm, resetSheet } from './views/sheet.js?v=202610121954';
-import { renderLab, renderLabResult, handleDrillClick } from './views/lab.js?v=202610121954';
-import { renderSettings, renderCredits, bookTableHtml } from './views/settings.js?v=202610121954';
-import { applyLinkParams, flushQueue, isSheetUrl, testConnection } from './sheets.js?v=202610121954';
+} from './tts.js?v=202610122032';
+import { handleRecorderClick } from './recorder.js?v=202610122032';
+import { handleBookClick, bookFiles } from './book.js?v=202610122032';
+import { esc, toast } from './ui.js?v=202610122032';
+import { initVoicePanel, open as openVoicePanel } from './voice-panel.js?v=202610122032';
+import { renderHome } from './views/home.js?v=202610122032';
+import { renderSheet, handleSheetClick, handleSheetKey, handleNameForm, resetSheet } from './views/sheet.js?v=202610122032';
+import { renderLab, renderLabResult, handleDrillClick } from './views/lab.js?v=202610122032';
+import { renderSettings, renderCredits, bookTableHtml } from './views/settings.js?v=202610122032';
+import { applyLinkParams, flushQueue, isSheetUrl, testConnection } from './sheets.js?v=202610122032';
 
 const root = document.documentElement;
 const main = document.getElementById('main');

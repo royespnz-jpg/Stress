@@ -33,6 +33,7 @@
 //   maze     – a way through the grid, only on squares with the pattern
 //   omit     – tap the words with a vowel that can be omitted
 //   record   – a passage to read aloud and record
+//   pick     – a dialogue: choose the stress pattern of each *word:Oo* in bold
 
 export const BOOKS = {
   ae: { short: 'Accurate English', long: 'Rebecca M. Dauer, Accurate English — Ch. 6 “Stress” and Ch. 7 “Stress (Advanced)”' },
@@ -960,9 +961,9 @@ const AE_72 = {
           page: 80,
           type: 'reduce',
           stress: true,
-          all: true,
+          stressOnly: true,
           audio: { page: 80, label: 'exercise a' },
-          task: 'Mark the stress and circle the vowels that are reduced in the italicized words.',
+          task: 'Mark the stress and circle the vowels that are reduced in the italicized words. <i>Tap the main stressed syllable of each word (only one), as the speaker says it. Check shows the reduced vowels circled.</i>',
           rows: [
             ['ph[o]t[o]*gr[a]ph', 'p[o]l[i]*t[i]c[ia]*n', 'd[i]pl[o]*m[a]t', 'D[e]m[o]*cr[a]t[i]*c', 'p[o]l[i]*t[i]*cs', 'd[i]pl[o]*m[a]t[i]*c', 'c[o]*mp[e]t[i]*t[o]*rs'],
             ['f[a]*m[i]l[ia]*r', 'p[o]*l[i]t[i]*c[a]*l', 'D[e]m[o]*cr[a]t', 'p[er]s[o]*n[a]*l', 'd[e]*m[o]cr[a]*c[y]'],
@@ -1045,17 +1046,6 @@ const AE_72 = {
           ],
         },
         {
-          key: 'p6c',
-          cont: true,
-          n: 'Practice 6',
-          page: 81,
-          type: 'words',
-          check: 'suffix',
-          task: 'Can you think of any other words that end in &lt;ically&gt;?',
-          rows: [{ suffix: ['ically'], label: '-ically', given: ['physically', 'practically', 'economically'] }],
-          need: 2,
-        },
-        {
           key: 'A',
           n: 'Exercise A',
           page: 82,
@@ -1100,10 +1090,10 @@ const EPU_22 = {
           key: 'A',
           n: 'A',
           page: 52,
-          type: 'lines',
-          dialogue: true,
+          type: 'pick',
+          options: ['Oo', 'oO', 'Ooo', 'oOo', 'ooO'],
           audio: { page: 52, code: 'B5' },
-          task: 'Listen to the conversation and listen to the stress patterns of the words in bold type.',
+          task: 'Listen to the conversation and listen to the stress patterns of the words in bold type. <i>Choose the pattern of each word in bold.</i>',
           lines: [
             ['A', 'When do you *begin:oO* your *holiday:Ooo*?'],
             ['B', 'On the *thirtieth:Ooo* of *August:Oo*.'],

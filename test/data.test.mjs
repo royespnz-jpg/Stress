@@ -6,7 +6,7 @@ import { WORDS } from '../js/words.js';
 import { wordInfo, patternOf } from '../js/stress.js';
 import { unitsOf, pointsOf, gapSay, stressFromIpa, wordProblem, stepBody } from '../js/views/sheet.js';
 
-const TYPES = ['table', 'pairs', 'lines', 'record', 'choice', 'count', 'stress', 'stressText', 'reduce', 'ate', 'sort', 'gaps', 'words', 'derive', 'maze', 'omit'];
+const TYPES = ['table', 'pairs', 'lines', 'record', 'choice', 'count', 'stress', 'stressText', 'reduce', 'ate', 'sort', 'gaps', 'words', 'derive', 'maze', 'omit', 'pick'];
 
 test('every worksheet is in a group, once', () => {
   const ids = GROUPS.flatMap((g) => g.ids);
@@ -130,4 +130,18 @@ test('checking the words students write', () => {
   assert.equal(wordProblem(F, F.rows[1], 'enjoyment', lex), null);
   assert.match(wordProblem(F, F.rows[2], 'carpet', lex), /isn’t made from/);
   assert.match(wordProblem(F, F.rows[2], 'careless', lex, ['careless']), /already/);
+});
+
+test('the teacher’s changes: no <ically> step, Unit 22 A is answered, 29.1 lists its examples', () => {
+  const steps = WORKSHEETS.flatMap(stepsOf);
+  assert.ok(!steps.some((s) => /ically&gt;\?/.test(s.task)), 'the "other words in <ically>" step is gone');
+  const a22 = stepsOf(WORKSHEETS.find((w) => w.id === 'epu-22')).find((s) => s.key === 'A');
+  assert.equal(a22.type, 'pick');
+  assert.equal(pointsOf(a22), 11);
+  for (const u of unitsOf(a22)) assert.equal(patternOf(u.word), u.tag, u.word);
+  const s29 = stepsOf(WORKSHEETS.find((w) => w.id === 'epu-29')).find((s) => s.key === '29.1');
+  assert.match(stepBody(s29), /shopping centre/);
+  const a80 = stepsOf(WORKSHEETS.find((w) => w.id === 'ae-7-2')).find((s) => s.page === 80 && s.type === 'reduce');
+  assert.ok(a80.stressOnly);
+  assert.doesNotMatch(stepBody(a80), /class="uv"/, 'one stress to mark per word, no vowels to circle');
 });

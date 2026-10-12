@@ -10,10 +10,10 @@
 // 6-1_page 63.mp3"), so a step finds its file by the page and the words of its
 // label; when a page has two recordings and the names don't tell them apart,
 // they are taken in track order.
-import { WORKSHEETS, stepsOf } from './worksheets.js?v=202610121954';
-import { CACHE_NAME, getSettings, onHalt, scriptStatus, checkScript, stop as stopVoice } from './tts.js?v=202610121954';
-import { isScriptUrl, scriptPost } from './script-api.js?v=202610121954';
-import { esc, icons } from './ui.js?v=202610121954';
+import { WORKSHEETS, stepsOf } from './worksheets.js?v=202610122032';
+import { CACHE_NAME, getSettings, onHalt, scriptStatus, checkScript, stop as stopVoice } from './tts.js?v=202610122032';
+import { isScriptUrl, scriptPost } from './script-api.js?v=202610122032';
+import { esc, icons } from './ui.js?v=202610122032';
 
 // ─── which file is which ────────────────────────────────────────────────────
 
