@@ -84,3 +84,13 @@ test('an activity split in two parts uses one recording', () => {
   assert.equal(slots.filter((s) => s.key === 'ae:80:exercise a').length, 1);
   assert.equal(slots.filter((s) => s.key === 'ae:81:practice 6').length, 1);
 });
+
+test('“Track No05” is the track of B5', () => {
+  const files = ['Track No05.mp3', 'Track No06.mp3', 'Track No07.mp3', 'Track No08.mp3', 'Track No36.mp3', 'Track No54.mp3'].map((n) => file(n, EPU));
+  const m = matchFiles(files);
+  assert.equal(m.get('epu:52:B5').name, 'Track No05.mp3');
+  assert.equal(m.get('epu:53:B8').name, 'Track No08.mp3');
+  assert.equal(m.get('epu:64:B36').name, 'Track No36.mp3');
+  assert.equal(m.get('epu:71:B54').name, 'Track No54.mp3');
+  assert.equal(m.has('epu:64:B37'), false);
+});

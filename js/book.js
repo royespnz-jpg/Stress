@@ -51,6 +51,9 @@ function fit(slot, file) {
     if (re(`\\b${kinds[kind] || kind}\\b[\\s-]*${id.replace('-', '[\\s.-]*')}\\b`).test(name)) score += 3;
   }
   if (slot.book === 'epu') {
+    // "Track No05.mp3", "Track 5": the track of B5 (as the other books' CDs are named)
+    const track = /\btrack\s*(?:no|n[°º]|#)?\s*0*(\d{1,3})\b/.exec(name);
+    if (code && track && Number(track[1]) === Number(code.replace(/\D/g, ''))) score += 4;
     const unit = slot.unit;
     if (unit && re(`\\b(?:unit|u)\\s*${unit}\\b`).test(name)) score += 2;
     const key = String(slot.step).toLowerCase();
@@ -252,7 +255,14 @@ export async function handleBookClick(target) {
   try {
     const matches = await bookMatches();
     const file = matches.get(el.dataset.bookPlayer);
-    if (!file) throw new Error('its file isn’t in the teacher’s folder (or its name doesn’t say the page)');
+    if (!file) {
+      const files = await bookFiles();
+      throw new Error(
+        files.length
+          ? `none of the ${files.length} files in the teacher’s folders is named for this activity (Settings → Check the recordings lists them)`
+          : 'the Google Script found no audio in the book folders: check that the account of the script can open them',
+      );
+    }
     const url = await fileUrl(file);
     const audio = new Audio(url);
     audio.addEventListener('timeupdate', () => draw(el, audio));
