@@ -94,3 +94,32 @@ test('“Track No05” is the track of B5', () => {
   assert.equal(m.get('epu:71:B54').name, 'Track No54.mp3');
   assert.equal(m.has('epu:64:B37'), false);
 });
+
+// The names in the teacher's folders (from the script's book-list, October 2026).
+const TEACHER = [
+  ...['15_chapter 6_Stress_table 6-1_page 63', '16_chapter 6_Stress_table 6-2_page 69', '17_chapter 6_exercise H_page 72', '18_chapter 6_exercise I_page 72', '19_chapter 7_practice 1', '20_chapter 7_practice 3', '21_chapter 7_practice A_page 77', '22_chapter 7_practice B_page 78', '23_chapter 7_practice C_page 78', '24_chapter 7_practice 5_page 79', '25_chapter 7_exercise_page 80', '26_chapter 7_practice 6_page 81', '27_chapter 7_exercise_page 82'].map((n) => [`${n}.mp3`, AE]),
+  ...[5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54].map((t) => [`TrackNo${String(t).padStart(2, '0')}.mp3`, EPU]),
+];
+
+test('the teacher’s 36 recordings, each with its activity', () => {
+  const files = [...TEACHER].reverse().map(([n, f]) => file(n, f));
+  const m = matchFiles(files);
+  const name = (k) => m.get(k)?.name;
+  assert.equal(m.size, 36);
+  assert.equal(name('ae:63:table 6-1'), '15_chapter 6_Stress_table 6-1_page 63.mp3');
+  assert.equal(name('ae:69:table 6-2'), '16_chapter 6_Stress_table 6-2_page 69.mp3');
+  assert.equal(name('ae:72:exercise h'), '17_chapter 6_exercise H_page 72.mp3');
+  assert.equal(name('ae:72:exercise i'), '18_chapter 6_exercise I_page 72.mp3');
+  assert.equal(name('ae:74:practice 1'), '19_chapter 7_practice 1.mp3');
+  assert.equal(name('ae:76:practice 3'), '20_chapter 7_practice 3.mp3');
+  assert.equal(name('ae:77:exercise a'), '21_chapter 7_practice A_page 77.mp3');
+  assert.equal(name('ae:78:exercise b'), '22_chapter 7_practice B_page 78.mp3');
+  assert.equal(name('ae:78:exercise c'), '23_chapter 7_practice C_page 78.mp3');
+  assert.equal(name('ae:79:practice 5'), '24_chapter 7_practice 5_page 79.mp3');
+  assert.equal(name('ae:80:exercise a'), '25_chapter 7_exercise_page 80.mp3');
+  assert.equal(name('ae:81:practice 6'), '26_chapter 7_practice 6_page 81.mp3');
+  assert.equal(name('ae:82:exercise a'), '27_chapter 7_exercise_page 82.mp3');
+  for (const s of audioSlots().filter((x) => x.book === 'epu')) {
+    assert.equal(name(s.key), `TrackNo${s.audio.code.slice(1).padStart(2, '0')}.mp3`, s.key);
+  }
+});

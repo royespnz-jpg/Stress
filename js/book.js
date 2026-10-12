@@ -46,9 +46,11 @@ function fit(slot, file) {
   const { code, label } = slot.audio;
   if (code && re(`\\b${code.replace(/^([a-z])0*/i, '$1\\s*0*')}\\b`).test(name)) score += 4;
   if (label) {
+    // The teacher's names say "practice A" for the book's Exercise A: the
+    // number or letter is what tells the activities apart.
     const [kind, id] = label.toLowerCase().split(' ');
-    const kinds = { table: 'table', exercise: '(?:exercise|ex)', practice: '(?:practice|pr)' };
-    if (re(`\\b${kinds[kind] || kind}\\b[\\s-]*${id.replace('-', '[\\s.-]*')}\\b`).test(name)) score += 3;
+    const kinds = { table: 'table', exercise: '(?:exercise|ex|practice|pr)', practice: '(?:practice|pr|exercise|ex)' };
+    if (re(`\\b${kinds[kind] || kind}\\b[\\s-]*${id.replace('-', '[\\s.-]*')}\\b`).test(name)) score += slot.uniqueLabel ? 4 : 3;
   }
   if (slot.book === 'epu') {
     // "Track No05.mp3", "Track 5": the track of B5 (as the other books' CDs are named)
@@ -85,6 +87,8 @@ export function audioSlots() {
     const same = slots.filter((o) => o.book === s.book && o.audio.page === s.audio.page);
     s.rank = same.indexOf(s);
     s.ofPage = same.length;
+    // "practice 1" is enough without the page: no other activity is called that.
+    s.uniqueLabel = Boolean(s.audio.label) && slots.filter((o) => o.book === s.book && o.audio.label === s.audio.label).length === 1;
   }
   return slots;
 }
