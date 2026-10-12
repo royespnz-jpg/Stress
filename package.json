@@ -1,0 +1,16 @@
+{
+  "name": "stress-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Word stress lab: Accurate English Ch. 6–7 and English Pronunciation in Use Units 22, 28–31, with ElevenLabs voices and the book recordings.",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "words": "node scripts/build-words.mjs",
+    "test": "node --test",
+    "gs": "node scripts/split-gs.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
