@@ -33,13 +33,35 @@ function bookOf(file) {
   return null;
 }
 
-// The words that identify an activity in a file name.
-function labelTokens(audio) {
-  if (audio.code) return [new RegExp(`\\b${audio.code.replace(/^([a-z])0*/i, '$1\\s*0*')}\\b`, 'i')];
-  const label = norm(audio.label);
-  const [kind, id] = label.split(' ');
-  const kinds = { table: 'table', exercise: '(?:exercise|ex)', practice: '(?:practice|pr)' };
-  return [new RegExp(`\\b${kinds[kind] || kind}\\b[\\s-]*${id.replace('-', '[\\s.-]*')}\\b`, 'i')];
+const re = (src) => new RegExp(src, 'i');
+
+// How well a file name fits an activity (0 = not at all): the page, the
+// activity's name in the book ("table 6-1", "exercise h", "22.4", "A"), the
+// unit, the track code (B5).
+function fit(slot, file) {
+  const name = norm(file.name);
+  const page = pageOf(file.name);
+  if (page != null && page !== slot.audio.page) return 0;
+  let score = page === slot.audio.page ? 2 : 0;
+  const { code, label } = slot.audio;
+  if (code && re(`\\b${code.replace(/^([a-z])0*/i, '$1\\s*0*')}\\b`).test(name)) score += 4;
+  if (label) {
+    const [kind, id] = label.toLowerCase().split(' ');
+    const kinds = { table: 'table', exercise: '(?:exercise|ex)', practice: '(?:practice|pr)' };
+    if (re(`\\b${kinds[kind] || kind}\\b[\\s-]*${id.replace('-', '[\\s.-]*')}\\b`).test(name)) score += 3;
+  }
+  if (slot.book === 'epu') {
+    const unit = slot.unit;
+    if (unit && re(`\\b(?:unit|u)\\s*${unit}\\b`).test(name)) score += 2;
+    const key = String(slot.step).toLowerCase();
+    if (/^\d+\.\d+$/.test(key)) {
+      const [u, n] = key.split('.');
+      if (re(`(?:^|\\s)${u}\\s*[.-]?\\s*${n}(?=\\s|$)`).test(name)) score += 4;
+    } else if (/^[a-z]$/.test(key) && re(`(?:^|\\s)(?:section\\s*|part\\s*|activity\\s*|exercise\\s*|ex\\s*)?${key}(?=\\s|$)`).test(name)) {
+      score += 3;
+    }
+  }
+  return score;
 }
 
 // Every recording a worksheet needs, in book order, with its rank on its page.
@@ -52,7 +74,8 @@ export function audioSlots() {
       const key = slotKey(sheet.book, step.audio);
       if (seen.has(key)) continue;
       seen.add(key);
-      slots.push({ key, book: sheet.book, audio: step.audio, sheet: sheet.id, step: step.key, n: step.n });
+      const unit = (/\d+/.exec(sheet.short) || [])[0];
+      slots.push({ key, book: sheet.book, audio: step.audio, sheet: sheet.id, step: step.key, n: step.n, unit: sheet.book === 'epu' ? unit : null });
     }
   }
   for (const s of slots) {
@@ -65,33 +88,38 @@ export function audioSlots() {
 
 export const slotKey = (book, audio) => `${book}:${audio.page}:${audio.code || audio.label}`;
 
+const isAudio = (f) => !f.mime || /^audio\//.test(f.mime) || /\.(mp3|m4a|wav|ogg|mpeg|aac|wma)$/i.test(f.name);
+const byTrack = (a, b) => trackNo(a.name) - trackNo(b.name) || a.name.localeCompare(b.name);
+
 // slot key → file, for all the slots at once (so two recordings of one page
 // don't end up with the same file).
 export function matchFiles(files, slots = audioSlots()) {
   const out = new Map();
   const used = new Set();
-  const audioFiles = files.filter((f) => !f.mime || /^audio\//.test(f.mime) || /\.(mp3|m4a|wav|ogg|mpeg|aac|wma)$/i.test(f.name));
-  const candidates = (slot) => {
+  const audioFiles = files.filter(isAudio);
+  const pool = (slot) => {
     const known = audioFiles.filter((f) => bookOf(f) === slot.book);
-    const pool = known.length ? known : audioFiles;
-    return pool.filter((f) => pageOf(f.name) === slot.audio.page || (slot.audio.code && labelTokens(slot.audio)[0].test(norm(f.name))));
+    return known.length ? known : audioFiles;
   };
-  // 1. Names that say which activity they are.
-  for (const slot of slots) {
-    const [re] = labelTokens(slot.audio);
-    const hit = candidates(slot).find((f) => !used.has(f.id) && re.test(norm(f.name)));
-    if (hit) {
-      out.set(slot.key, hit);
-      used.add(hit.id);
-    }
+  // 1. Names that say which activity they are: the best fits first.
+  const pairs = [];
+  for (const slot of slots) for (const f of pool(slot)) {
+    const score = fit(slot, f);
+    if (score >= 4) pairs.push({ slot, f, score });
+  }
+  pairs.sort((a, b) => b.score - a.score || byTrack(a.f, b.f));
+  for (const { slot, f } of pairs) {
+    if (out.has(slot.key) || used.has(f.id)) continue;
+    out.set(slot.key, f);
+    used.add(f.id);
   }
   // 2. The rest of each page, in track order.
   for (const slot of slots) {
     if (out.has(slot.key)) continue;
-    const pagePool = candidates(slot).filter((f) => !used.has(f.id)).sort((a, b) => trackNo(a.name) - trackNo(b.name) || a.name.localeCompare(b.name));
+    const pagePool = pool(slot).filter((f) => !used.has(f.id) && pageOf(f.name) === slot.audio.page).sort(byTrack);
     const left = slots.filter((o) => o.book === slot.book && o.audio.page === slot.audio.page && !out.has(o.key));
     const i = left.indexOf(slot);
-    const hit = pagePool.length === left.length ? pagePool[i] : pagePool.length === 1 && left.length === 1 ? pagePool[0] : null;
+    const hit = pagePool.length === left.length ? pagePool[i] : null;
     if (hit) {
       out.set(slot.key, hit);
       used.add(hit.id);

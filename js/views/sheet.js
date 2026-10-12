@@ -6,7 +6,7 @@ import { BOOKS, WORKSHEETS, sheetById, stepsOf } from '../worksheets.js';
 import { targetsIn, wordsIn, plainText, markupWord, segments, renderMarked } from '../text.js';
 import { wordInfo, stressedHtml, patternOf, patternHtml } from '../stress.js';
 import { bookPlayerHtml } from '../book.js';
-import { esc, icons, playButton, audioButtons, recButton } from '../ui.js';
+import { esc, icons, playButton as appPlay, audioButtons as appAudio, recButton as appRec } from '../ui.js';
 import { getSettings, saveSettings } from '../tts.js';
 import { sheetConfigured, studentName, newId, sendResult } from '../sheets.js';
 
@@ -59,8 +59,25 @@ function mapWords(text, fn) {
     .join('');
 }
 
-// A word as a button that says it.
+// An activity with the book's recording uses only that recording: no app
+// voice inside it (the recorder stays, without the "Model → You" compare).
+let noVoice = false;
+function withBook(step, render) {
+  const before = noVoice;
+  noVoice = Boolean(step.audio);
+  try {
+    return render();
+  } finally {
+    noVoice = before;
+  }
+}
+const playButton = (...a) => (noVoice ? '' : appPlay(...a));
+const audioButtons = (...a) => (noVoice ? '' : appAudio(...a));
+const recButton = (text, opts = {}) => appRec(text, noVoice ? { ...opts, free: true } : opts);
+
+// A word as a button that says it (as a plain chip where the book's recording plays).
 function wordChip(text, html = esc(text), { voice = 'A' } = {}) {
+  if (noVoice) return `<span class="wchip static"><span class="wchip-t">${html}</span></span>`;
   const say = markupWord(text).replace(/\s+[–-]\s+/g, ', ');
   return `<button type="button" class="wchip" data-play data-mode="natural" data-voice="${voice}" data-text="${esc(say)}"
     aria-label="${esc(`Listen: ${say}`)}"><span class="wchip-t">${html}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>`;
@@ -212,7 +229,7 @@ export function renderSheet(id) {
       <div class="eyebrow"><a href="#/">${esc(BOOKS[sheet.book].short)}</a> · pp. ${esc(sheet.pages)}</div>
       <h1><span class="sheet-short">${esc(sheet.short)}</span> ${esc(sheet.title)}</h1>
       <p class="lede">${esc(sheet.intro)}</p>
-      <div class="row"><span class="badge book">${esc(BOOKS[sheet.book].short)}</span><span class="badge">${steps.length} activities · ${total} points</span></div>
+      <div class="row"><span class="badge book">${esc(BOOKS[sheet.book].short)}</span><span class="badge">${steps.filter((s) => !s.cont).length} activities · ${total} points</span></div>
     </header>
     <div class="scorebar" data-scorebar data-total="${total}" data-attempt="${newId()}" data-started="${Date.now()}">
       <span class="score" data-score>0 / ${total}</span>
@@ -229,26 +246,41 @@ export function renderSheet(id) {
 }
 
 function stepSection(sheet, step, k) {
-  const scored = isScored(step);
-  const check = scored && step.type !== 'choice';
-  return `<section class="step" data-step="${k}" data-type="${step.type}" id="s-${esc(step.key)}-${k}">
+  return withBook(step, () => (step.cont ? contSection(step, k) : mainSection(sheet, step, k)));
+}
+
+const pointsPill = (step) =>
+  isScored(step) ? `<span class="pts">${pointsOf(step)} pt${pointsOf(step) > 1 ? 's' : ''}</span>` : '<span class="pts free">Listen · repeat</span>';
+
+const checkRow = (step) =>
+  isScored(step) && step.type !== 'choice'
+    ? `<div class="check-row" data-check-row><button type="button" class="btn primary" data-check>${icons.check}Check</button>
+      <span class="check-msg" data-check-msg aria-live="polite"></span></div>`
+    : '';
+
+const stepTail = (step) => `${step.note ? `<p class="step-note">${withPatterns(esc(step.note))}</p>` : ''}
+    ${step.extra ? `<div class="chips extra">${step.extra.map((w) => wordChip(w, shownWord(w))).join('')}</div>` : ''}
+    ${checkRow(step)}`;
+
+function mainSection(sheet, step, k) {
+  return `<section class="step${step.audio ? ' has-book' : ''}" data-step="${k}" data-type="${step.type}" id="s-${esc(step.key)}-${k}">
     <div class="step-head">
       <span class="step-n">${esc(step.n)}</span>
-      <div class="step-meta"><span>p. ${step.page}</span>${step.level ? `<span class="lvl">${esc(step.level)}</span>` : ''}${
-        scored ? `<span class="pts">${pointsOf(step)} pt${pointsOf(step) > 1 ? 's' : ''}</span>` : '<span class="pts free">Listen · repeat</span>'
-      }</div>
+      <div class="step-meta"><span>p. ${step.page}</span>${step.level ? `<span class="lvl">${esc(step.level)}</span>` : ''}${pointsPill(step)}</div>
     </div>
     <p class="step-task">${withPatterns(step.task)}</p>
     ${step.audio ? bookPlayerHtml(sheet.book, step.audio) : ''}
     <div class="step-body" data-body>${stepBody(step)}</div>
-    ${step.note ? `<p class="step-note">${withPatterns(esc(step.note))}</p>` : ''}
-    ${step.extra ? `<div class="chips extra">${step.extra.map((w) => wordChip(w, shownWord(w))).join('')}</div>` : ''}
-    ${
-      check
-        ? `<div class="check-row" data-check-row><button type="button" class="btn primary" data-check>${icons.check}Check</button>
-          <span class="check-msg" data-check-msg aria-live="polite"></span></div>`
-        : ''
-    }
+    ${stepTail(step)}
+  </section>`;
+}
+
+// The next part of the same activity: no number, no second player.
+function contSection(step, k) {
+  return `<section class="step cont" data-step="${k}" data-type="${step.type}" id="s-${esc(step.key)}-${k}">
+    <p class="step-task"><span class="step-meta">${pointsPill(step)}</span> ${withPatterns(step.task)}</p>
+    <div class="step-body" data-body>${stepBody(step)}</div>
+    ${stepTail(step)}
   </section>`;
 }
 
@@ -392,7 +424,7 @@ function dialogueHtml(lines, { html = lineHtml, rec = true, groups } = {}) {
   const breaks = new Set();
   if (groups) groups.reduce((n, g) => (breaks.add(n + g), n + g), 0);
   return `<div class="dialogue" id="${id}">
-    <div class="dlg-head"><button type="button" class="pbtn main" data-play-dialogue="${id}">${icons.play}<span>Play the conversation</span></button></div>
+    ${noVoice ? '' : `<div class="dlg-head"><button type="button" class="pbtn main" data-play-dialogue="${id}">${icons.play}<span>Play the conversation</span></button></div>`}
     <ol class="dlg-lines">${lines
       .map(([who, text], i) => {
         const voice = who === 'B' ? 'B' : 'A';
@@ -570,7 +602,7 @@ function reduceBody(step) {
           return `<div class="unit red-unit" data-u="${i}">
             <span class="red-word">${word}</span>
             ${step.stress && u.info.count > 1 ? `<span class="red-stress"><span class="u-ask">Stress</span>${sylPicker(u.info, u.word)}</span>` : ''}
-            <button type="button" class="mini-play" data-play data-mode="natural" data-voice="A" data-text="${esc(u.word)}" aria-label="${esc(`Listen: ${u.word}`)}">${icons.play}</button>
+            ${noVoice ? '' : `<button type="button" class="mini-play" data-play data-mode="natural" data-voice="A" data-text="${esc(u.word)}" aria-label="${esc(`Listen: ${u.word}`)}">${icons.play}</button>`}
             <span class="u-fb" data-fb></span>
           </div>`;
         })
@@ -1027,7 +1059,7 @@ const CHECKERS = {
     });
     const table = el.querySelector('[data-sort-table]');
     table.hidden = false;
-    table.innerHTML = sortTable(step);
+    table.innerHTML = withBook(step, () => sortTable(step));
     return rows;
   },
 

@@ -29,12 +29,12 @@ function sheetCard(sheet, progress, n) {
   const p = progress[sheet.id];
   const total = stepsOf(sheet).reduce((t, s) => t + pointsOf(s), 0);
   const pct = p ? Math.round((100 * p.correct) / p.total) : 0;
-  const audio = stepsOf(sheet).filter((s) => s.audio).length;
+  const audio = stepsOf(sheet).filter((s) => s.audio && !s.cont).length;
   return `<a class="card set-card sheet-card" href="#/sheet/${sheet.id}">
     <div class="row"><span class="sheet-no">${String(n).padStart(2, '0')}</span><span class="badge">${esc(sheet.short)}</span><span class="badge">pp. ${esc(sheet.pages)}</span></div>
     <h3>${esc(sheet.title)}</h3>
     <p>${esc(sheet.intro)}</p>
-    <div class="sheet-meta muted"><span>${stepsOf(sheet).length} activities</span><span>${total} points</span>${audio ? `<span>${icons.headphones}${audio} book recording${audio > 1 ? "s" : ""}</span>` : ''}</div>
+    <div class="sheet-meta muted"><span>${stepsOf(sheet).filter((s) => !s.cont).length} activities</span><span>${total} points</span>${audio ? `<span>${icons.headphones}${audio} book recording${audio > 1 ? "s" : ""}</span>` : ''}</div>
     <div class="progress" title="Best score: ${pct}%"><span style="width:${pct}%"></span></div>
     <small class="muted">${p ? `Best: ${p.correct}/${p.total} (${pct}%)` : 'Not tried yet'}</small>
   </a>`;
