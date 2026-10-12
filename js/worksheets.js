@@ -1660,9 +1660,9 @@ const EPU_31 = {
           rows: [
             ['public', 'publicity'],
             ['national', 'nationality'],
-            ['photo', 'photography'],
+            ['photograph', 'photography'],
             ['climate', 'climatology'],
-            ['astronaut', 'astronomy'],
+            ['astro-', 'astronomy'],
             ['chemist', 'chemistry'],
           ].map(([a, b]) => ({ a: { w: a }, b: { w: b } })),
           note: 'If we add the ending -ic to a word, the stress goes on the syllable before -ic (see Unit 30): photography → photographic. In words for an expert in the subject, such as photographer or climatologist, the stress stays on the same syllable as in the word ending in -y: photography → photographer, climatology → climatologist.',
