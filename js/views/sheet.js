@@ -2,13 +2,13 @@
 // Every activity the book asks to mark, count, circle, write or sort is
 // interactive: the student answers, presses Check, and sees what was right.
 // The finished worksheet goes to the teacher's Google Sheet.
-import { BOOKS, WORKSHEETS, sheetById, stepsOf } from '../worksheets.js?v=202610121954';
-import { targetsIn, wordsIn, plainText, markupWord, segments, renderMarked } from '../text.js?v=202610121954';
-import { wordInfo, stressedHtml, patternOf, patternHtml } from '../stress.js?v=202610121954';
-import { bookPlayerHtml } from '../book.js?v=202610121954';
-import { esc, icons, playButton as appPlay, audioButtons as appAudio, recButton as appRec } from '../ui.js?v=202610121954';
-import { getSettings, saveSettings } from '../tts.js?v=202610121954';
-import { sheetConfigured, studentName, newId, sendResult } from '../sheets.js?v=202610121954';
+import { BOOKS, WORKSHEETS, sheetById, stepsOf } from '../worksheets.js?v=202610122032';
+import { targetsIn, wordsIn, plainText, markupWord, segments, renderMarked } from '../text.js?v=202610122032';
+import { wordInfo, stressedHtml, patternOf, patternHtml } from '../stress.js?v=202610122032';
+import { bookPlayerHtml } from '../book.js?v=202610122032';
+import { esc, icons, playButton as appPlay, audioButtons as appAudio, recButton as appRec } from '../ui.js?v=202610122032';
+import { getSettings, saveSettings } from '../tts.js?v=202610122032';
+import { sheetConfigured, studentName, newId, sendResult } from '../sheets.js?v=202610122032';
 
 const PROGRESS_KEY = 'st.progress.v1';
 
@@ -154,6 +154,8 @@ function unitsOf(step) {
       return step.lines.flatMap((l, li) => lineTargets(step, l, li));
     case 'reduce':
       return step.rows.flatMap((row, r) => row.map((m) => ({ m, row: r, word: markupWord(m), info: wordInfo(markupWord(m)) })));
+    case 'pick':
+      return step.lines.flatMap(([, l], li) => targetsIn(l).map((t) => ({ word: t.word, tag: t.tag, line: li })));
     case 'ate':
       return step.lines.flatMap(([, l], li) =>
         targetsIn(l).map((t) => ({ word: t.word, tag: t.tag, line: li, info: wordInfo(t.word, forced(step, t.word, li + 1)) })),
@@ -306,6 +308,8 @@ export function stepBody(step) {
       return reduceBody(step);
     case 'ate':
       return ateBody(step);
+    case 'pick':
+      return pickBody(step);
     case 'sort':
       return sortBody(step);
     case 'gaps':
@@ -599,6 +603,9 @@ function reduceBody(step) {
           const word = segments(u.m)
             .map((s) => (s.u ? `<button type="button" class="uv" data-v="${v++}" aria-pressed="false" aria-label="${esc(`${s.t} in ${u.word}: reduced?`)}">${esc(s.t)}</button>` : esc(s.t)))
             .join('');
+          if (step.stressOnly) {
+            return `<div class="unit syl-unit" data-u="${i}">${sylPicker(u.info, u.word)}<span class="u-fb" data-fb></span></div>`;
+          }
           return `<div class="unit red-unit" data-u="${i}">
             <span class="red-word">${word}</span>
             ${step.stress && u.info.count > 1 ? `<span class="red-stress"><span class="u-ask">Stress</span>${sylPicker(u.info, u.word)}</span>` : ''}
@@ -635,19 +642,47 @@ function ateBody(step) {
   return dialogueHtml(step.lines, { html, groups: step.groups });
 }
 
+// ── a dialogue: choose the pattern of each word in bold ──
+
+function pickBody(step) {
+  let n = 0;
+  const html = (text) => {
+    let out = '';
+    let at = 0;
+    for (const t of targetsIn(text)) {
+      out += esc(text.slice(at, t.index));
+      out += `<span class="unit pick-unit" data-u="${n++}"><b class="pick-w">${esc(t.word)}</b>${patternChoices(step.options)}<span class="u-fb" data-fb></span></span>`;
+      at = t.index + t.raw.length;
+    }
+    return out + esc(text.slice(at));
+  };
+  return dialogueHtml(step.lines, { html });
+}
+
 // ── sort the words by stress pattern ──
 
 function sortBody(step) {
-  const units = unitsOf(step);
-  const examples = step.items.filter((it) => it.example);
+  let n = 0;
   return `${step.text ? `<div class="card passage-card"><p class="passage">${step.text}</p>
       <div class="row">${playButton(plainText(step.text.replace(/<[^>]+>/g, '')), { label: 'Listen to the text' })}</div></div>` : ''}
-    ${examples.length ? `<p class="muted ex-line">Example: ${examples.map((it) => `<b>${esc(it.word)}</b> ${patternHtml(it.col)}`).join(' · ')}</p>` : ''}
-    <div class="units sort-units">${units
-      .map(({ item }, i) => {
+    <div class="units sort-units">${step.items
+      .map((item) => {
         const write = step.write && item.show !== item.word;
-        return `<div class="unit sort-unit" data-u="${i}">
-          <span class="u-word">${write ? `<span class="show">${esc(item.show)}</span><input class="mini-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${esc(`Write ${item.show} in full`)}" placeholder="full word">` : esc(item.word)}</span>
+        const word = write
+          ? `<span class="show">${esc(item.show)}</span>${
+              item.example
+                ? `<span class="ex-fill">${esc(item.word)}</span>`
+                : `<input class="mini-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${esc(`Write ${item.show} in full`)}" placeholder="full word">`
+            }`
+          : esc(item.word);
+        // The book's examples are in the list, already answered.
+        if (item.example) {
+          return `<div class="unit sort-unit example"><span class="u-word">${word}</span>
+            <span class="opt-row">${step.columns.map((c) => `<span class="chip-opt pat-opt${c === item.col ? ' on' : ''}">${patternHtml(c)}</span>`).join('')}</span>
+            <span class="ex-tag">Example</span></div>`;
+        }
+        return `<div class="unit sort-unit" data-u="${n++}">
+          <span class="u-word">${word}</span>
           ${patternChoices(step.columns)}
           <span class="u-fb" data-fb></span>
         </div>`;
@@ -1003,6 +1038,17 @@ const CHECKERS = {
   reduce(step, el) {
     return unitsOf(step).map((u, i) => {
       const unit = el.querySelector(`[data-u="${i}"]`);
+      if (step.stressOnly) {
+        // Only the main stress is marked; the answer also shows the reduced vowels.
+        const s = chosenSyl(unit);
+        const ok = s === u.info.stress;
+        showStress(unit, u.info);
+        const word = segments(u.m)
+          .map((g) => (g.r ? `<span class="rv" title="reduced">${esc(g.t)}</span>` : esc(g.t)))
+          .join('');
+        verdict(unit, ok, `<span class="red-answer">${word}</span>`);
+        return { prompt: u.word, answer: s != null ? u.info.parts[s] : '—', expected: u.info.parts[u.info.stress], correct: ok };
+      }
       const segs = segments(u.m).filter((s) => s.u);
       let ok = true;
       unit.querySelectorAll('.uv').forEach((b, v) => {
@@ -1024,6 +1070,17 @@ const CHECKERS = {
       }
       verdict(unit, ok);
       return { prompt: u.word, answer, expected, correct: ok };
+    });
+  },
+
+  pick(step, el) {
+    return unitsOf(step).map((u, i) => {
+      const unit = el.querySelector(`[data-u="${i}"]`);
+      const col = chosen(unit, 'col');
+      const ok = col === u.tag;
+      unit.querySelectorAll('[data-group="col"] button').forEach((b) => b.classList.toggle('answer', b.dataset.val === u.tag));
+      verdict(unit, ok);
+      return { prompt: `${u.line + 1}. ${u.word}`, answer: col || '—', expected: u.tag, correct: ok };
     });
   },
 
@@ -1168,7 +1225,7 @@ function choiceRows(step, el) {
 
 let lexiconPromise = null;
 export function lexicon() {
-  lexiconPromise ||= fetch('lexicon.json?v=202610121954')
+  lexiconPromise ||= fetch('lexicon.json?v=202610122032')
     .then((r) => {
       if (!r.ok) throw new Error('the word list didn’t load');
       return r.json();

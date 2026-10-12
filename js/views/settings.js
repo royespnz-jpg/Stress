@@ -1,9 +1,9 @@
-import { MODELS } from '../audio-core.js?v=202610121954';
-import { getSettings, scriptStatus, voiceName } from '../tts.js?v=202610121954';
-import { esc, playButton } from '../ui.js?v=202610121954';
-import { isSheetUrl, pendingCount, studentLink } from '../sheets.js?v=202610121954';
-import { BOOKS, sheetById } from '../worksheets.js?v=202610121954';
-import { audioSlots, matchFiles } from '../book.js?v=202610121954';
+import { MODELS } from '../audio-core.js?v=202610122032';
+import { getSettings, scriptStatus, voiceName } from '../tts.js?v=202610122032';
+import { esc, playButton } from '../ui.js?v=202610122032';
+import { isSheetUrl, pendingCount, studentLink } from '../sheets.js?v=202610122032';
+import { BOOKS, sheetById } from '../worksheets.js?v=202610122032';
+import { audioSlots, matchFiles } from '../book.js?v=202610122032';
 
 export function renderSettings() {
   const s = getSettings();

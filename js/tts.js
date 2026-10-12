@@ -15,9 +15,9 @@ import {
   ttsRequestBody,
   ttsUrl,
   words,
-} from './audio-core.js?v=202610121954';
-import { DEFAULT_SCRIPT_URL, OLD_SCRIPT_URLS } from './config.js?v=202610121954';
-import { isScriptUrl, scriptGet, scriptPost } from './script-api.js?v=202610121954';
+} from './audio-core.js?v=202610122032';
+import { DEFAULT_SCRIPT_URL, OLD_SCRIPT_URLS } from './config.js?v=202610122032';
+import { isScriptUrl, scriptGet, scriptPost } from './script-api.js?v=202610122032';
 
 // Stress Lab and Connected Speech Lab share the github.io origin: own keys.
 const SETTINGS_KEY = 'st.settings.v1';
