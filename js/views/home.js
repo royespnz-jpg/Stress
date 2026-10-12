@@ -1,7 +1,7 @@
-import { BOOKS, GROUPS, sheetById, stepsOf } from '../worksheets.js';
-import { wordInfo, patternOf, patternHtml } from '../stress.js';
-import { esc, icons, playButton } from '../ui.js';
-import { loadProgress, pointsOf } from './sheet.js';
+import { BOOKS, GROUPS, sheetById, stepsOf } from '../worksheets.js?v=202610121954';
+import { wordInfo, patternOf, patternHtml } from '../stress.js?v=202610121954';
+import { esc, icons, playButton } from '../ui.js?v=202610121954';
+import { loadProgress, pointsOf } from './sheet.js?v=202610121954';
 
 // The stress moves: photograph → photography → photographic (Accurate English p. 79).
 const FAMILY = ['photograph', 'photography', 'photographic'];

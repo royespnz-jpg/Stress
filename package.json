@@ -8,7 +8,8 @@
     "start": "node scripts/serve.mjs",
     "words": "node scripts/build-words.mjs",
     "test": "node --test",
-    "gs": "node scripts/split-gs.mjs"
+    "gs": "node scripts/split-gs.mjs",
+    "version": "node scripts/version.mjs"
   },
   "engines": {
     "node": ">=20"

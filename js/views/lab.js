@@ -1,9 +1,9 @@
 // The Stress Lab: any word or sentence with its stress pattern, and a quick
 // drill with the worksheet words.
-import { WORDS } from '../words.js';
-import { wordInfo, patternHtml, keyOf } from '../stress.js';
-import { esc, icons, playButton, recButton } from '../ui.js';
-import { lexicon } from './sheet.js';
+import { WORDS } from '../words.js?v=202610121954';
+import { wordInfo, patternHtml, keyOf } from '../stress.js?v=202610121954';
+import { esc, icons, playButton, recButton } from '../ui.js?v=202610121954';
+import { lexicon } from './sheet.js?v=202610121954';
 
 const SAMPLES = ['photograph photography photographic', 'I need a record of what you record.', 'economy economic economics', 'Saturday the thirteenth of September', 'They will present a present.', 'refrigerator refrigeration'];
 

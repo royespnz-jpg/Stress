@@ -1,7 +1,7 @@
 // Sends exercise results and recordings to the teacher's Google Sheet through
 // the Apps Script web app in google-apps-script/Code.gs.
-import { getSettings, saveSettings } from './tts.js';
-import { isScriptUrl, scriptGet, scriptPost } from './script-api.js';
+import { getSettings, saveSettings } from './tts.js?v=202610121954';
+import { isScriptUrl, scriptGet, scriptPost } from './script-api.js?v=202610121954';
 
 const QUEUE_KEY = 'st.sheet.queue.v1';
 

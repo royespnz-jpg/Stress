@@ -1,7 +1,7 @@
 // Syllables and stress of the worksheet words (js/words.js), and the stress
 // pattern circles (Oo, oOo…).
-import { WORDS } from './words.js';
-import { escapeHtml as esc } from './text.js';
+import { WORDS } from './words.js?v=202610121954';
+import { escapeHtml as esc } from './text.js?v=202610121954';
 
 export function keyOf(word) {
   return String(word)

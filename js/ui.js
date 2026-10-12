@@ -1,4 +1,4 @@
-import { escapeHtml as esc } from './text.js';
+import { escapeHtml as esc } from './text.js?v=202610121954';
 
 export { esc };
 
