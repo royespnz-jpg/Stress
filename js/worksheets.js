@@ -12,6 +12,8 @@
 //
 // Worksheet: { id, book, title, short, pages, intro, parts: [{ label, title, text, steps }] }
 // Step: { key, n, page, task, type, audio, note, … fields of its type }
+//   cont: true — the second part of the activity before it (one activity in
+//   the book, one recording): shown inside it, without its own number or player.
 // Types (js/views/practice.js):
 //   info     – text and examples to listen to and repeat (not scored)
 //   table    – rows of words (label, ipa, words, note) to listen to and repeat
@@ -371,6 +373,7 @@ const AE_64 = {
         },
         {
           key: 'r2q',
+          cont: true,
           n: 'Rule 2',
           page: 67,
           type: 'choice',
@@ -967,6 +970,7 @@ const AE_72 = {
         },
         {
           key: 'Ad',
+          cont: true,
           n: 'Exercise A',
           page: 80,
           type: 'lines',
@@ -1026,6 +1030,7 @@ const AE_72 = {
         },
         {
           key: 'p6b',
+          cont: true,
           n: 'Practice 6',
           page: 81,
           type: 'table',
@@ -1041,6 +1046,7 @@ const AE_72 = {
         },
         {
           key: 'p6c',
+          cont: true,
           n: 'Practice 6',
           page: 81,
           type: 'words',
@@ -1456,6 +1462,7 @@ const EPU_29 = {
         },
         {
           key: '29.1f',
+          cont: true,
           n: '29.1 Follow up',
           page: 67,
           type: 'record',

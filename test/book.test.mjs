@@ -56,3 +56,31 @@ test('a code does not match a longer code', () => {
   assert.equal(m.get('epu:52:B5').name, 'B5.mp3');
   assert.equal(m.get('epu:70:B50').name, 'B50.mp3');
 });
+
+test('Pronunciation in Use names that say the unit and the activity', () => {
+  const names = [
+    'Unit 22_A_page 52.mp3', 'Unit 22_B_page 52.mp3', 'Unit 22_C_page 52.mp3', 'Unit 22_22.4_page 53.mp3',
+    'Unit 28_B_page 64.mp3', 'Unit 28_C_page 64.mp3', 'Unit 28_D_page 64.mp3', 'Unit 28_28.1_page 65.mp3', 'Unit 28_28.2_page 65.mp3', 'Unit 28_28.3_page 65.mp3',
+    'Unit 29_A_page 66.mp3', 'Unit 29_B_page 66.mp3', 'Unit 29_29.1_page 67.mp3', 'Unit 29_29.2_page 67.mp3', 'Unit 29_29.3_page 67.mp3',
+    'Unit 30_B_page 68.mp3', 'Unit 30_C_page 68.mp3', 'Unit 30_30.1_page 69.mp3',
+    'Unit 31_A_page 70.mp3', 'Unit 31_B_page 70.mp3', 'Unit 31_C_page 70.mp3', 'Unit 31_31.3_page 71.mp3', 'Unit 31_31.4_page 71.mp3',
+  ];
+  // shuffled, so only the names can tell them apart
+  const files = [...names].reverse().map((n) => file(n, EPU));
+  const m = matchFiles(files);
+  const slots = audioSlots().filter((s) => s.book === 'epu');
+  assert.equal(slots.filter((s) => m.has(s.key)).length, 23);
+  assert.equal(m.get('epu:52:B5').name, 'Unit 22_A_page 52.mp3');
+  assert.equal(m.get('epu:52:B7').name, 'Unit 22_C_page 52.mp3');
+  assert.equal(m.get('epu:53:B8').name, 'Unit 22_22.4_page 53.mp3');
+  assert.equal(m.get('epu:64:B38').name, 'Unit 28_D_page 64.mp3');
+  assert.equal(m.get('epu:65:B40').name, 'Unit 28_28.2_page 65.mp3');
+  assert.equal(m.get('epu:67:B46').name, 'Unit 29_29.3_page 67.mp3');
+  assert.equal(m.get('epu:71:B54').name, 'Unit 31_31.4_page 71.mp3');
+});
+
+test('an activity split in two parts uses one recording', () => {
+  const slots = audioSlots();
+  assert.equal(slots.filter((s) => s.key === 'ae:80:exercise a').length, 1);
+  assert.equal(slots.filter((s) => s.key === 'ae:81:practice 6').length, 1);
+});

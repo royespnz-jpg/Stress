@@ -3953,6 +3953,27 @@ em.tw {
   border-top: 0;
   padding-top: 4px;
 }
+.step.cont {
+  margin-top: 22px;
+  padding-top: 0;
+  border-top: 0;
+}
+.step.cont > .step-task .step-meta {
+  display: inline-flex;
+  margin-right: 6px;
+  vertical-align: 2px;
+}
+.wchip.static {
+  cursor: default;
+}
+.wchip.static:hover {
+  border-color: var(--line);
+  transform: none;
+  box-shadow: none;
+}
+.has-book .book-player {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-glide) 10%, transparent);
+}
 .step-head {
   align-items: center;
   flex-wrap: wrap;
