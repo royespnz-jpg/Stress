@@ -70,6 +70,8 @@ No hace falta compilar nada.
 npm start          # http://localhost:8080
 npm test           # pruebas: datos, corrección, audios del libro y Apps Script
 node scripts/split-gs.mjs   # después de cambiar Code.gs (regenera partes/)
+npm run version    # antes de publicar: pone una versión nueva a los archivos (?v=…)
+                   # para que los navegadores no usen copias viejas
 ```
 
 - `js/worksheets.js` — todas las actividades, en el orden y con las páginas de los libros.

@@ -2,13 +2,13 @@
 // Every activity the book asks to mark, count, circle, write or sort is
 // interactive: the student answers, presses Check, and sees what was right.
 // The finished worksheet goes to the teacher's Google Sheet.
-import { BOOKS, WORKSHEETS, sheetById, stepsOf } from '../worksheets.js';
-import { targetsIn, wordsIn, plainText, markupWord, segments, renderMarked } from '../text.js';
-import { wordInfo, stressedHtml, patternOf, patternHtml } from '../stress.js';
-import { bookPlayerHtml } from '../book.js';
-import { esc, icons, playButton as appPlay, audioButtons as appAudio, recButton as appRec } from '../ui.js';
-import { getSettings, saveSettings } from '../tts.js';
-import { sheetConfigured, studentName, newId, sendResult } from '../sheets.js';
+import { BOOKS, WORKSHEETS, sheetById, stepsOf } from '../worksheets.js?v=202610121954';
+import { targetsIn, wordsIn, plainText, markupWord, segments, renderMarked } from '../text.js?v=202610121954';
+import { wordInfo, stressedHtml, patternOf, patternHtml } from '../stress.js?v=202610121954';
+import { bookPlayerHtml } from '../book.js?v=202610121954';
+import { esc, icons, playButton as appPlay, audioButtons as appAudio, recButton as appRec } from '../ui.js?v=202610121954';
+import { getSettings, saveSettings } from '../tts.js?v=202610121954';
+import { sheetConfigured, studentName, newId, sendResult } from '../sheets.js?v=202610121954';
 
 const PROGRESS_KEY = 'st.progress.v1';
 
@@ -1168,7 +1168,7 @@ function choiceRows(step, el) {
 
 let lexiconPromise = null;
 export function lexicon() {
-  lexiconPromise ||= fetch('lexicon.json')
+  lexiconPromise ||= fetch('lexicon.json?v=202610121954')
     .then((r) => {
       if (!r.ok) throw new Error('the word list didn’t load');
       return r.json();
